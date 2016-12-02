@@ -1,0 +1,23 @@
+#!/usr/bin/python3
+
+import argparse;
+import parser;
+from LearningTree import LearningTree;
+
+argparser = argparse.ArgumentParser(description="Todo: write description.");
+argparser.add_argument("dataFile", help="The file to be run.");
+argparser.add_argument("-t", "--tokens", action="store_true", help="Print tokens instead of answer.");
+argparser.add_argument("-s", "--syntax", action="store_true", help="Print syntax tree instead of answer.");
+argparser.add_argument("-d", "--debug", action="store_true", help="Debug mode. Print information about run.");
+
+args = argparser.parse_args();
+
+with open(args.dataFile) as f:
+    instr = f.read();
+
+
+lt = LearningTree();
+p = parser.getParser(args.debug).parse(instr);
+p.root.interpret(lt);
+
+print(lt);
