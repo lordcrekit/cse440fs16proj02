@@ -36,4 +36,4 @@ if args.tree:
     print(lt);
     sys.exit(0);
 
-print(lt.generate_tree(args.debug).OUTPUT_STR());
+print(lt.generate_tree(args.debug).OUTPUT_STR(lt));

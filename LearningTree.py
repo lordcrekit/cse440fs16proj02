@@ -54,6 +54,13 @@ class LearningTree(object):
         self.goal = None;
         self.data = [];
 
+    def getType(self, key):
+        for at in self.attributes:
+            for op in at.options:
+                if op.name == key:
+                    return at;
+        assert False;
+
     def __str__(self):
         return "LearningTree\nname: %s\nattributes:%s\ngoal:%s\ndata:%s" \
                 % (self.name, pformat(self.attributes), self.goal, pformat(self.data));
@@ -62,7 +69,7 @@ class LearningTree(object):
     def generate_tree(self, verbose):
         assert type(verbose) is bool;
         out = EndPoint(self.data);
-        out.calculate();
+        out.calculate(self, verbose);
         return out;
 
 indent = -1;
@@ -89,7 +96,7 @@ class EndPoint(object):
             self.data.append(item);
 
 
-    def calculate(self, verbose=True):
+    def calculate(self, learningTree, verbose=True):
         assert len(self.data) > 0;
         if self.positives == 0 or self.negatives == 0:
             return;
@@ -103,16 +110,17 @@ class EndPoint(object):
             if current is None or current[0] < gain:
                 current = (gain, op);
         self.children = current[1];
-        #print("split on %s with gain %s" % (current[1].keys(), current[0]));
+        if verbose:
+            print("split on %s with gain %s" % (current[1].keys(), current[0]));
         for thing in self.children.values():
-            thing.calculate(verbose);
+            thing.calculate(learningTree, verbose);
 
 
     def __str__(self):
         return "EndPoint %s" % (pformat(self.data),);
     def __repr__(self):
         return str(self);
-    def OUTPUT_STR(self):
+    def OUTPUT_STR(self, lt):
         if self.positives == 0:
             return "F (%s)" % (len(self.data),);
         elif self.negatives == 0:
@@ -125,7 +133,8 @@ class EndPoint(object):
                 outstr += "\n%s" % (' '*indent);
                 if indent > 0:
                     outstr += "|";
-                outstr += "%s %s" % (key, self.children[key].OUTPUT_STR());
+                outstr += "%s = " % (lt.getType(key).name,);
+                outstr += "%s %s" % (key, self.children[key].OUTPUT_STR(lt));
             indent -= 1;
             return outstr;
 
