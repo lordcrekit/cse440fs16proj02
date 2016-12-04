@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import sys;
 import argparse;
 import parser;
 from LearningTree import LearningTree;
@@ -7,7 +8,7 @@ from LearningTree import LearningTree;
 argparser = argparse.ArgumentParser(description="Todo: write description.");
 argparser.add_argument("dataFile", help="The file to be run.");
 argparser.add_argument("-t", "--tokens", action="store_true", help="Print tokens instead of answer.");
-argparser.add_argument("-s", "--syntax", action="store_true", help="Print syntax tree instead of answer.");
+argparser.add_argument("-lt", "--tree", action="store_true", help="Print learning tree instead of answer.");
 argparser.add_argument("-d", "--debug", action="store_true", help="Debug mode. Print information about run.");
 
 args = argparser.parse_args();
@@ -15,9 +16,24 @@ args = argparser.parse_args();
 with open(args.dataFile) as f:
     instr = f.read();
 
+if args.tokens:
+    import lexer;
+    l = lexer.getLexer();
+    l.input(instr);
+    outstr = "";
+    while True:
+        found = l.token();
+        if found is None:
+            print(outstr);
+            sys.exit(0);
+        outstr += str(found) + '\n';
 
 lt = LearningTree();
-p = parser.getParser(args.debug).parse(instr);
-p.root.interpret(lt);
+p = parser.getParser(args.debug).parse(instr.strip());
+p.interpret(lt);
 
-print(lt);
+if args.tree:
+    print(lt);
+    sys.exit(0);
+
+print(lt.generate_tree(args.debug).OUTPUT_STR());
